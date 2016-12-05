@@ -1,0 +1,6 @@
+[package]
+name = "monkey"
+version = "0.1.0"
+authors = ["Chris Aumann <me@chr4.org>"]
+
+[dependencies]
