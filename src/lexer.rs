@@ -4,7 +4,7 @@ pub struct Lexer<'a> {
     input: &'a str,
     position: usize, // current position in input (points to current char)
     read_position: usize, // current reading position in input (after current char)
-    ch: char, // current char under examination
+    ch: Option<char>, // current char under examination
 }
 
 impl<'a> Lexer<'a> {
@@ -13,7 +13,7 @@ impl<'a> Lexer<'a> {
             input: input,
             position: 0,
             read_position: 0,
-            ch: '0',
+            ch: None,
         };
         l.read_char();
         return l;
@@ -31,61 +31,59 @@ impl<'a> Lexer<'a> {
         self.skip_whitespace();
 
         match self.ch {
-            '=' => {
+            Some(ch @ '=') => {
                 if self.peek_char() == '=' {
-                    let ch = self.ch;
                     self.read_char();
                     tok = token::Token {
                         token_type: token::EQ,
-                        literal: format!("{}{}", ch, self.ch),
+                        literal: format!("{}{}", ch, self.ch.unwrap()),
                     };
                 } else {
-                    tok = new_token(token::ASSIGN, self.ch);
+                    tok = new_token(token::ASSIGN, ch);
                 }
             }
-            '+' => tok = new_token(token::PLUS, self.ch),
-            '-' => tok = new_token(token::MINUS, self.ch),
-            '!' => {
+            Some(ch @ '+') => tok = new_token(token::PLUS, ch),
+            Some(ch @ '-') => tok = new_token(token::MINUS, ch),
+            Some(ch @ '!') => {
                 if self.peek_char() == '=' {
-                    let ch = self.ch;
                     self.read_char();
                     tok = token::Token {
                         token_type: token::NOT_EQ,
-                        literal: format!("{}{}", ch, self.ch),
+                        literal: format!("{}{}", ch, self.ch.unwrap()),
                     };
                 } else {
-                    tok = new_token(token::BANG, self.ch);
+                    tok = new_token(token::BANG, ch);
                 }
             }
-            '/' => tok = new_token(token::SLASH, self.ch),
-            '*' => tok = new_token(token::ASTERISK, self.ch),
-            '<' => tok = new_token(token::LT, self.ch),
-            '>' => tok = new_token(token::GT, self.ch),
-            ';' => tok = new_token(token::SEMICOLON, self.ch),
-            ',' => tok = new_token(token::COMMA, self.ch),
-            '{' => tok = new_token(token::LBRACE, self.ch),
-            '}' => tok = new_token(token::RBRACE, self.ch),
-            '(' => tok = new_token(token::LPAREN, self.ch),
-            ')' => tok = new_token(token::RPAREN, self.ch),
+            Some(ch @ '/') => tok = new_token(token::SLASH, ch),
+            Some(ch @ '*') => tok = new_token(token::ASTERISK, ch),
+            Some(ch @ '<') => tok = new_token(token::LT, ch),
+            Some(ch @ '>') => tok = new_token(token::GT, ch),
+            Some(ch @ ';') => tok = new_token(token::SEMICOLON, ch),
+            Some(ch @ ',') => tok = new_token(token::COMMA, ch),
+            Some(ch @ '{') => tok = new_token(token::LBRACE, ch),
+            Some(ch @ '}') => tok = new_token(token::RBRACE, ch),
+            Some(ch @ '(') => tok = new_token(token::LPAREN, ch),
+            Some(ch @ ')') => tok = new_token(token::RPAREN, ch),
 
-            // TODO: This is the EOF messup because 0 is not a char in rust
-            '0' => {
-                tok.literal = String::new();
-                tok.token_type = token::EOF;
-            }
-
-            _ => {
-                if is_letter(self.ch) {
+            Some(ch @ _) => {
+                if is_letter(ch) {
                     tok.literal = self.read_identifier();
                     tok.token_type = token::lookup_ident(&tok.literal);
                     return tok;
-                } else if is_digit(self.ch) {
+                } else if is_digit(ch) {
                     tok.token_type = token::INT;
                     tok.literal = self.read_number();
                     return tok;
                 } else {
-                    tok = new_token(token::ILLEGAL, self.ch);
+                    tok = new_token(token::ILLEGAL, ch);
                 }
+            }
+
+            // Handle EOF
+            None => {
+                tok.literal = String::new();
+                tok.token_type = token::EOF;
             }
         }
 
@@ -97,23 +95,23 @@ impl<'a> Lexer<'a> {
         // Loop read_char() until non-whitespace is found
         loop {
             match self.ch {
-                ' ' => self.read_char(),
-                '\t' => self.read_char(),
-                '\n' => self.read_char(),
-                '\r' => self.read_char(),
-                _ => return,
+                Some(' ') => self.read_char(),
+                Some('\t') => self.read_char(),
+                Some('\n') => self.read_char(),
+                Some('\r') => self.read_char(),
+                Some(_) => return,
+                None => return, // EOF is handled by caller
             }
         }
     }
 
     fn read_char(&mut self) {
         if self.read_position >= self.input.len() {
-            self.ch = '0'; // TODO: This is not what's intended, probably covers EOF
+            self.ch = None;
         } else {
             self.ch = self.input
                 .chars()
-                .nth(self.read_position)
-                .unwrap(); // TODO: unwrap sucks
+                .nth(self.read_position);
         }
 
         self.position = self.read_position;
@@ -123,15 +121,16 @@ impl<'a> Lexer<'a> {
     // TODO: There's a peekable() function:
     //       https://doc.rust-lang.org/std/str/struct.Chars.html
     fn peek_char(&mut self) -> char {
-        // TODO: This kind of return procedure doesn't feel very rusty
         if self.read_position >= self.input.len() {
-            return '0'; // TODO: This is not what's intended, probably covers EOF
-        } else {
-            return self.input
-                .chars()
-                .nth(self.read_position)
-                .unwrap(); // TODO: Unwrap sucks
+            self.ch = None;
+            // TODO: Use Option here, so we can return EOF
+            return ' ';
         }
+
+        return self.input
+            .chars()
+            .nth(self.read_position)
+            .unwrap(); // TODO: Unwrap sucks
     }
 
     // TODO: Not sure whether String is advisable here. Couldn't find anything that clones
@@ -139,7 +138,7 @@ impl<'a> Lexer<'a> {
     fn read_identifier(&mut self) -> String {
         let position = self.position;
 
-        while is_letter(self.ch) {
+        while is_letter(self.ch.expect("Error reading character")) {
             self.read_char();
         }
 
@@ -150,7 +149,7 @@ impl<'a> Lexer<'a> {
     fn read_number(&mut self) -> String {
         let position = self.position;
 
-        while is_digit(self.ch) {
+        while is_digit(self.ch.expect("Error reading character")) {
             self.read_char();
         }
 
