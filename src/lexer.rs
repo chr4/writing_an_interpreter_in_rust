@@ -32,7 +32,7 @@ impl<'a> Lexer<'a> {
 
         match self.ch {
             Some(ch @ '=') => {
-                if self.peek_char() == '=' {
+                if self.peek_char_eq('=') {
                     self.read_char();
                     tok = token::Token {
                         token_type: token::TokenType::Equal,
@@ -45,7 +45,7 @@ impl<'a> Lexer<'a> {
             Some(ch @ '+') => tok = new_token(token::TokenType::Plus, ch),
             Some(ch @ '-') => tok = new_token(token::TokenType::Minus, ch),
             Some(ch @ '!') => {
-                if self.peek_char() == '=' {
+                if self.peek_char_eq('=') {
                     self.read_char();
                     tok = token::Token {
                         token_type: token::TokenType::NotEqual,
@@ -118,19 +118,18 @@ impl<'a> Lexer<'a> {
         self.read_position += 1;
     }
 
-    // TODO: There's a peekable() function:
-    //       https://doc.rust-lang.org/std/str/struct.Chars.html
-    fn peek_char(&mut self) -> char {
+    fn peek_char_eq(&mut self, ch: char) -> bool {
+        // Return false on EOF
         if self.read_position >= self.input.len() {
-            self.ch = None;
-            // TODO: Use Option here, so we can return EOF
-            return ' ';
+            return false;
         }
 
-        return self.input
+        let peek_ch = self.input
             .chars()
             .nth(self.read_position)
             .unwrap(); // TODO: Unwrap sucks
+
+        peek_ch == ch
     }
 
     // TODO: Not sure whether String is advisable here. Couldn't find anything that clones
