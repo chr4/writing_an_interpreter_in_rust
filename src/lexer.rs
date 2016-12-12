@@ -93,15 +93,11 @@ impl<'a> Lexer<'a> {
 
     fn skip_whitespace(&mut self) {
         // Loop read_char() until non-whitespace is found
-        loop {
-            match self.ch {
-                Some(' ') => self.read_char(),
-                Some('\t') => self.read_char(),
-                Some('\n') => self.read_char(),
-                Some('\r') => self.read_char(),
-                Some(_) => return,
-                None => return, // EOF is handled by caller
-            }
+        while match self.ch {
+            Some(ch) => ch.is_whitespace(),
+            _ => false,
+        } {
+            self.read_char();
         }
     }
 
