@@ -43,6 +43,17 @@ pub struct Token {
     pub literal: String,
 }
 
+impl Default for Token {
+    // Choose empty string and Illegal identifier as default
+    // this should be overriden before being used
+    fn default() -> Self {
+        Token {
+            token_type: TokenType::Illegal,
+            literal: String::new(),
+        }
+    }
+}
+
 pub fn lookup_ident(ident: &str) -> TokenType {
     // Note: The Go version uses a map[string]TokenType to select idents
     match ident {
