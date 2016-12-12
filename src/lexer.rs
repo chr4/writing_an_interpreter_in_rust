@@ -20,13 +20,8 @@ impl<'a> Lexer<'a> {
     }
 
     pub fn next_token(&mut self) -> token::Token {
-        // Unlike Go, Rust doesn't initialize the variables by default.
-        // Choosing an empty string and the ILLEGAL token as default values.
-        // They are overwritten later.
-        let mut tok = token::Token {
-            token_type: token::TokenType::Illegal,
-            literal: String::new(),
-        };
+        // Unlike Go, Rust doesn't initialize the variables by default. 
+        let mut tok: token::Token = Default::default();
 
         self.skip_whitespace();
 
