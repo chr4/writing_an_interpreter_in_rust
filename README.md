@@ -2,6 +2,8 @@
 
 This is an implementation of the Monkey interpreter from Thorsten Ball's book [Writing an interpreter in Go](https://interpreterbook.com).
 
+[![Build Status](https://travis-ci.org/chr4/writing_an_interpreter_in_rust.svg?branch=master)](https://travis-ci.org/chr4/writing_an_interpreter_in_rust)
+
 ## Usage
 
 ```bash
