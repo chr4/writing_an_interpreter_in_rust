@@ -21,7 +21,7 @@ impl<'a> Lexer<'a> {
 
     pub fn next_token(&mut self) -> token::Token {
         // Unlike Go, Rust doesn't initialize the variables by default. 
-        let mut tok: token::Token = Default::default();
+        let mut tok = token::Token::default();
 
         self.skip_whitespace();
 
