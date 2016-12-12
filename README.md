@@ -9,7 +9,7 @@ This is an implementation of the Monkey interpreter from Thorsten Ball's book [W
 ```bash
 $ git clone https://github.com/chr4/writing_an_interpreter_in_rust
 $ cd writing_an_interpreter_in_rust
-$ cargo tests
+$ cargo test
 $ cargo run
 ```
 
