@@ -36,7 +36,7 @@ impl<'a> Lexer<'a> {
                     self.read_char();
                     tok = token::Token {
                         token_type: token::TokenType::Equal,
-                        literal: format!("{}{}", ch, self.ch.unwrap()),
+                        literal: String::from("=="),
                     };
                 } else {
                     tok = new_token(token::TokenType::Assign, ch);
@@ -49,7 +49,7 @@ impl<'a> Lexer<'a> {
                     self.read_char();
                     tok = token::Token {
                         token_type: token::TokenType::NotEqual,
-                        literal: format!("{}{}", ch, self.ch.unwrap()),
+                        literal: String::from("!="),
                     };
                 } else {
                     tok = new_token(token::TokenType::Bang, ch);
