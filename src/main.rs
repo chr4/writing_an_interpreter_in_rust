@@ -1,7 +1,9 @@
-use std::io::{self, BufRead, Write};
-
 pub mod lexer;
 pub mod token;
+
+use std::io::{self, BufRead, Write};
+use token::TokenType;
+use lexer::Lexer;
 
 // Start a custom repl
 fn main() {
@@ -14,12 +16,12 @@ fn main() {
 
         let mut line = String::new();
         stdin.lock().read_line(&mut line).expect("Error reading from stdin");
-        let mut lexer = lexer::Lexer::new(&mut line);
+        let mut lexer = Lexer::new(&mut line);
 
         loop {
             let tok = lexer.next_token();
             println!("{:?}", tok);
-            if tok.token_type == token::TokenType::EndOfFile {
+            if tok.token_type == TokenType::EndOfFile {
                 break;
             }
         }
