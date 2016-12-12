@@ -71,7 +71,7 @@ impl<'a> Lexer<'a> {
                     tok.literal = self.read_identifier();
                     tok.token_type = token::lookup_ident(&tok.literal);
                     return tok;
-                } else if is_digit(ch) {
+                } else if ch.is_numeric() {
                     tok.token_type = token::TokenType::Integer;
                     tok.literal = self.read_number();
                     return tok;
@@ -144,7 +144,7 @@ impl<'a> Lexer<'a> {
     fn read_number(&mut self) -> String {
         let position = self.position;
 
-        while is_digit(self.ch.expect("Error reading character")) {
+        while self.ch.expect("Error reading character").is_numeric() {
             self.read_char();
         }
 
@@ -154,11 +154,7 @@ impl<'a> Lexer<'a> {
 }
 
 fn is_letter(ch: char) -> bool {
-    'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
-}
-
-fn is_digit(ch: char) -> bool {
-    '0' <= ch && ch <= '9'
+    ch.is_alphabetic() || ch == '_'
 }
 
 fn new_token(token_type: token::TokenType, ch: char) -> token::Token {
