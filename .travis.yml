@@ -1,5 +1,14 @@
 language: rust
+
+cache: cargo
+
 rust:
   - stable
   - beta
   - nightly
+    
+os:
+  - linux
+
+notifications:
+  email: false
