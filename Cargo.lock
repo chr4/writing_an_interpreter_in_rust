@@ -1,4 +1,4 @@
 [root]
-name = "monkey"
+name = "writing_an_interpreter_in_rust"
 version = "0.1.0"
 
