@@ -154,7 +154,7 @@ impl<'a> Lexer<'a> {
 }
 
 fn is_letter(ch: char) -> bool {
-    'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
+    ch.is_alphabetic() || ch == '_'
 }
 
 fn new_token(token_type: token::TokenType, ch: char) -> token::Token {
