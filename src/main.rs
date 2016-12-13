@@ -19,7 +19,7 @@ fn main() {
         loop {
             let tok = lexer.next_token();
             println!("{:?}", tok);
-            if tok.token_type == token::TokenType::EndOfFile {
+            if tok == token::Token::EndOfFile {
                 break;
             }
         }
