@@ -1,6 +1,5 @@
 use token;
 use token::Token;
-use token::TokenType;
 
 pub struct Lexer<'a> {
     input: &'a str,
@@ -28,59 +27,51 @@ impl<'a> Lexer<'a> {
         self.skip_whitespace();
 
         match self.ch {
-            Some(ch @ '=') => {
+            Some('=') => {
                 if self.peek_char_eq('=') {
                     self.read_char();
-                    tok = Token {
-                        token_type: TokenType::Equal,
-                        literal: String::from("=="),
-                    };
+                    tok = Token::Equal;
                 } else {
-                    tok = new_token(TokenType::Assign, ch);
+                    tok = Token::Assign;
                 }
             }
-            Some(ch @ '+') => tok = new_token(TokenType::Plus, ch),
-            Some(ch @ '-') => tok = new_token(TokenType::Minus, ch),
-            Some(ch @ '!') => {
+            Some('+') => tok = Token::Plus,
+            Some('-') => tok = Token::Minus,
+            Some('!') => {
                 if self.peek_char_eq('=') {
                     self.read_char();
-                    tok = Token {
-                        token_type: TokenType::NotEqual,
-                        literal: String::from("!="),
-                    };
+                    tok = Token::NotEqual;
                 } else {
-                    tok = new_token(TokenType::Bang, ch);
+                    tok = Token::Bang;
                 }
             }
-            Some(ch @ '/') => tok = new_token(TokenType::Slash, ch),
-            Some(ch @ '*') => tok = new_token(TokenType::Asterisk, ch),
-            Some(ch @ '<') => tok = new_token(TokenType::LowerThan, ch),
-            Some(ch @ '>') => tok = new_token(TokenType::GreaterThan, ch),
-            Some(ch @ ';') => tok = new_token(TokenType::Semicolon, ch),
-            Some(ch @ ',') => tok = new_token(TokenType::Comma, ch),
-            Some(ch @ '{') => tok = new_token(TokenType::LeftBrace, ch),
-            Some(ch @ '}') => tok = new_token(TokenType::RightBrace, ch),
-            Some(ch @ '(') => tok = new_token(TokenType::LeftParenthesis, ch),
-            Some(ch @ ')') => tok = new_token(TokenType::RightParenthesis, ch),
+            Some('/') => tok = Token::Slash,
+            Some('*') => tok = Token::Asterisk,
+            Some('<') => tok = Token::LowerThan,
+            Some('>') => tok = Token::GreaterThan,
+            Some(';') => tok = Token::Semicolon,
+            Some(',') => tok = Token::Comma,
+            Some('{') => tok = Token::LeftBrace,
+            Some('}') => tok = Token::RightBrace,
+            Some('(') => tok = Token::LeftParenthesis,
+            Some(')') => tok = Token::RightParenthesis,
 
             Some(ch @ _) => {
                 if is_letter(ch) {
-                    tok.literal = self.read_identifier();
-                    tok.token_type = token::lookup_ident(&tok.literal);
+                    let literal = self.read_identifier();
+                    tok = token::lookup_ident(&literal);
                     return tok;
                 } else if ch.is_numeric() {
-                    tok.token_type = TokenType::Integer;
-                    tok.literal = self.read_number();
+                    tok = Token::Integer(self.read_number());
                     return tok;
                 } else {
-                    tok = new_token(TokenType::Illegal, ch);
+                    tok = Token::Illegal; // TODO: Maybe we need ch here, to display a nice error message later?
                 }
             }
 
             // Handle EOF
             None => {
-                tok.literal = String::new();
-                tok.token_type = TokenType::EndOfFile;
+                tok = Token::EndOfFile;
             }
         }
 
@@ -145,20 +136,13 @@ impl<'a> Lexer<'a> {
             self.read_char();
         }
 
-        // Return new str containing the identifier
+        // Return new str containing the number
         self.input[position..self.position].to_owned()
     }
 }
 
 fn is_letter(ch: char) -> bool {
     ch.is_alphabetic() || ch == '_'
-}
-
-fn new_token(token_type: TokenType, ch: char) -> Token {
-    Token {
-        token_type: token_type,
-        literal: ch.to_string(),
-    }
 }
 
 #[test]
@@ -188,314 +172,84 @@ if (5 < 10) {
 
     let mut tests = Vec::new();
 
-    tests.push(Token {
-        token_type: TokenType::Let,
-        literal: "let".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Ident,
-        literal: "five".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Assign,
-        literal: "=".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Integer,
-        literal: "5".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Semicolon,
-        literal: ";".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Let,
-        literal: "let".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Ident,
-        literal: "ten".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Assign,
-        literal: "=".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Integer,
-        literal: "10".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Semicolon,
-        literal: ";".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Let,
-        literal: "let".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Ident,
-        literal: "add".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Assign,
-        literal: "=".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Function,
-        literal: "fn".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::LeftParenthesis,
-        literal: "(".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Ident,
-        literal: "x".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Comma,
-        literal: ",".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Ident,
-        literal: "y".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::RightParenthesis,
-        literal: ")".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::LeftBrace,
-        literal: "{".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Ident,
-        literal: "x".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Plus,
-        literal: "+".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Ident,
-        literal: "y".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Semicolon,
-        literal: ";".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::RightBrace,
-        literal: "}".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Semicolon,
-        literal: ";".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Let,
-        literal: "let".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Ident,
-        literal: "result".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Assign,
-        literal: "=".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Ident,
-        literal: "add".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::LeftParenthesis,
-        literal: "(".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Ident,
-        literal: "five".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Comma,
-        literal: ",".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Ident,
-        literal: "ten".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::RightParenthesis,
-        literal: ")".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Semicolon,
-        literal: ";".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Bang,
-        literal: "!".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Minus,
-        literal: "-".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Slash,
-        literal: "/".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Asterisk,
-        literal: "*".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Integer,
-        literal: "5".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Semicolon,
-        literal: ";".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Integer,
-        literal: "5".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::LowerThan,
-        literal: "<".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Integer,
-        literal: "10".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::GreaterThan,
-        literal: ">".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Integer,
-        literal: "5".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Semicolon,
-        literal: ";".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::If,
-        literal: "if".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::LeftParenthesis,
-        literal: "(".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Integer,
-        literal: "5".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::LowerThan,
-        literal: "<".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Integer,
-        literal: "10".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::RightParenthesis,
-        literal: ")".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::LeftBrace,
-        literal: "{".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Return,
-        literal: "return".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::True,
-        literal: "true".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Semicolon,
-        literal: ";".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::RightBrace,
-        literal: "}".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Else,
-        literal: "else".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::LeftBrace,
-        literal: "{".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Return,
-        literal: "return".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::False,
-        literal: "false".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Semicolon,
-        literal: ";".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::RightBrace,
-        literal: "}".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Integer,
-        literal: "10".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Equal,
-        literal: "==".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Integer,
-        literal: "10".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Semicolon,
-        literal: ";".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Integer,
-        literal: "10".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::NotEqual,
-        literal: "!=".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Integer,
-        literal: "9".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::Semicolon,
-        literal: ";".to_string(),
-    });
-    tests.push(Token {
-        token_type: TokenType::EndOfFile,
-        literal: "".to_string(),
-    });
+    tests.push(Token::Let);
+    tests.push(Token::Ident("five".to_string()));
+    tests.push(Token::Assign);
+    tests.push(Token::Integer("5".to_string()));
+    tests.push(Token::Semicolon);
+    tests.push(Token::Let);
+    tests.push(Token::Ident("ten".to_string()));
+    tests.push(Token::Assign);
+    tests.push(Token::Integer("10".to_string()));
+    tests.push(Token::Semicolon);
+    tests.push(Token::Let);
+    tests.push(Token::Ident("add".to_string()));
+    tests.push(Token::Assign);
+    tests.push(Token::Function);
+    tests.push(Token::LeftParenthesis);
+    tests.push(Token::Ident("x".to_string()));
+    tests.push(Token::Comma);
+    tests.push(Token::Ident("y".to_string()));
+    tests.push(Token::RightParenthesis);
+    tests.push(Token::LeftBrace);
+    tests.push(Token::Ident("x".to_string()));
+    tests.push(Token::Plus);
+    tests.push(Token::Ident("y".to_string()));
+    tests.push(Token::Semicolon);
+    tests.push(Token::RightBrace);
+    tests.push(Token::Semicolon);
+    tests.push(Token::Let);
+    tests.push(Token::Ident("result".to_string()));
+    tests.push(Token::Assign);
+    tests.push(Token::Ident("add".to_string()));
+    tests.push(Token::LeftParenthesis);
+    tests.push(Token::Ident("five".to_string()));
+    tests.push(Token::Comma);
+    tests.push(Token::Ident("ten".to_string()));
+    tests.push(Token::RightParenthesis);
+    tests.push(Token::Semicolon);
+    tests.push(Token::Bang);
+    tests.push(Token::Minus);
+    tests.push(Token::Slash);
+    tests.push(Token::Asterisk);
+    tests.push(Token::Integer("5".to_string()));
+    tests.push(Token::Semicolon);
+    tests.push(Token::Integer("5".to_string()));
+    tests.push(Token::LowerThan);
+    tests.push(Token::Integer("10".to_string()));
+    tests.push(Token::GreaterThan);
+    tests.push(Token::Integer("5".to_string()));
+    tests.push(Token::Semicolon);
+    tests.push(Token::If);
+    tests.push(Token::LeftParenthesis);
+    tests.push(Token::Integer("5".to_string()));
+    tests.push(Token::LowerThan);
+    tests.push(Token::Integer("10".to_string()));
+    tests.push(Token::RightParenthesis);
+    tests.push(Token::LeftBrace);
+    tests.push(Token::Return);
+    tests.push(Token::True);
+    tests.push(Token::Semicolon);
+    tests.push(Token::RightBrace);
+    tests.push(Token::Else);
+    tests.push(Token::LeftBrace);
+    tests.push(Token::Return);
+    tests.push(Token::False);
+    tests.push(Token::Semicolon);
+    tests.push(Token::RightBrace);
+    tests.push(Token::Integer("10".to_string()));
+    tests.push(Token::Equal);
+    tests.push(Token::Integer("10".to_string()));
+    tests.push(Token::Semicolon);
+    tests.push(Token::Integer("10".to_string()));
+    tests.push(Token::NotEqual);
+    tests.push(Token::Integer("9".to_string()));
+    tests.push(Token::Semicolon);
+    tests.push(Token::EndOfFile);
 
     let mut l = Lexer::new(input);
     for t in tests {
         let tok = l.next_token();
-        assert_eq!(tok.token_type, t.token_type);
-        assert_eq!(tok.literal, t.literal);
+        assert_eq!(tok, t);
     }
-}
-
-#[test]
-fn new_token_test() {
-    let token = new_token(TokenType::EndOfFile, 'c');
-    assert_eq!(token.token_type, TokenType::EndOfFile);
-    assert_eq!(token.literal, "c");
 }

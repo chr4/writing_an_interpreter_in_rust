@@ -2,7 +2,7 @@ pub mod lexer;
 pub mod token;
 
 use std::io::{self, BufRead, Write};
-use token::TokenType;
+use token::Token;
 use lexer::Lexer;
 
 // Start a custom repl
@@ -21,7 +21,7 @@ fn main() {
         loop {
             let tok = lexer.next_token();
             println!("{:?}", tok);
-            if tok.token_type == TokenType::EndOfFile {
+            if tok == Token::EndOfFile {
                 break;
             }
         }
