@@ -21,60 +21,56 @@ impl<'a> Lexer<'a> {
     }
 
     pub fn next_token(&mut self) -> Token {
-        // Unlike Go, Rust doesn't initialize the variables by default.
-        let mut tok = Token::default();
-
         self.skip_whitespace();
 
-        match self.ch {
+        let tok = match self.ch {
             Some('=') => {
                 if self.peek_char_eq('=') {
                     self.read_char();
-                    tok = Token::Equal;
+                    Token::Equal
                 } else {
-                    tok = Token::Assign;
+                    Token::Assign
                 }
             }
-            Some('+') => tok = Token::Plus,
-            Some('-') => tok = Token::Minus,
+            Some('+') => Token::Plus,
+            Some('-') => Token::Minus,
             Some('!') => {
                 if self.peek_char_eq('=') {
                     self.read_char();
-                    tok = Token::NotEqual;
+                    Token::NotEqual
                 } else {
-                    tok = Token::Bang;
+                    Token::Bang
                 }
             }
-            Some('/') => tok = Token::Slash,
-            Some('*') => tok = Token::Asterisk,
-            Some('<') => tok = Token::LowerThan,
-            Some('>') => tok = Token::GreaterThan,
-            Some(';') => tok = Token::Semicolon,
-            Some(',') => tok = Token::Comma,
-            Some('{') => tok = Token::LeftBrace,
-            Some('}') => tok = Token::RightBrace,
-            Some('(') => tok = Token::LeftParenthesis,
-            Some(')') => tok = Token::RightParenthesis,
+            Some('/') => Token::Slash,
+            Some('*') => Token::Asterisk,
+            Some('<') => Token::LowerThan,
+            Some('>') => Token::GreaterThan,
+            Some(';') => Token::Semicolon,
+            Some(',') => Token::Comma,
+            Some('{') => Token::LeftBrace,
+            Some('}') => Token::RightBrace,
+            Some('(') => Token::LeftParenthesis,
+            Some(')') => Token::RightParenthesis,
 
             Some(ch @ _) => {
                 if is_letter(ch) {
+                    // TODO
                     let literal = self.read_identifier();
-                    tok = token::lookup_ident(&literal);
-                    return tok;
+                    token::lookup_ident(&literal)
                 } else if ch.is_numeric() {
-                    tok = Token::Integer(self.read_number());
-                    return tok;
+                    // TODO
+                    Token::Integer(self.read_number())
                 } else {
-                    tok = Token::Illegal; // TODO: Maybe we need ch here, to display a nice error message later?
+                    Token::Illegal // TODO: Maybe we need ch here, to display a nice error message later?
                 }
             }
 
             // Handle EOF
-            None => {
-                tok = Token::EndOfFile;
-            }
-        }
+            None => Token::EndOfFile,
+        };
 
+        // TODO: Do not read all the time here.
         self.read_char();
         return tok;
     }
@@ -102,6 +98,7 @@ impl<'a> Lexer<'a> {
         self.read_position += 1;
     }
 
+    // TODO: Use peekable
     fn peek_char_eq(&mut self, ch: char) -> bool {
         // Return false on EOF
         if self.read_position >= self.input.len() {
@@ -121,6 +118,7 @@ impl<'a> Lexer<'a> {
     fn read_identifier(&mut self) -> String {
         let position = self.position;
 
+        // TODO: While peek.is_numeric?
         while is_letter(self.ch.expect("Error reading character")) {
             self.read_char();
         }
@@ -132,6 +130,7 @@ impl<'a> Lexer<'a> {
     fn read_number(&mut self) -> String {
         let position = self.position;
 
+        // TODO: While peek.is_numeric?
         while self.ch.expect("Error reading character").is_numeric() {
             self.read_char();
         }
