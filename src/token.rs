@@ -1,11 +1,11 @@
 #[derive(Debug, PartialEq)]
-pub enum TokenType {
+pub enum Token {
     Illegal,
     EndOfFile,
 
-    // Identifiers + literals
-    Ident,
-    Integer,
+    // Literals are stored as strings
+    Ident(String),
+    Integer(String),
 
     // Operators
     Assign,
@@ -37,38 +37,28 @@ pub enum TokenType {
     Return,
 }
 
-#[derive(Debug)]
-pub struct Token {
-    pub token_type: TokenType,
-    pub literal: String,
-}
-
 impl Default for Token {
-    // Choose empty string and Illegal identifier as default
+    // Choose an Illegal identifier as default
     // this should be overriden before being used
-    fn default() -> Self {
-        Token {
-            token_type: TokenType::Illegal,
-            literal: String::new(),
-        }
+    fn default() -> Token {
+        Token::Illegal
     }
 }
 
-pub fn lookup_ident(ident: &str) -> TokenType {
-    // Note: The Go version uses a map[string]TokenType to select idents
+pub fn lookup_ident(ident: &str) -> Token {
     match ident {
-        "fn" => TokenType::Function,
-        "let" => TokenType::Let,
-        "true" => TokenType::True,
-        "false" => TokenType::False,
-        "if" => TokenType::If,
-        "else" => TokenType::Else,
-        "return" => TokenType::Return,
-        _ => TokenType::Ident,
+        "fn" => Token::Function,
+        "let" => Token::Let,
+        "true" => Token::True,
+        "false" => Token::False,
+        "if" => Token::If,
+        "else" => Token::Else,
+        "return" => Token::Return,
+        _ => Token::Ident(ident.to_string()),
     }
 }
 
 #[test]
 fn lookup_ident_test() {
-    assert_eq!(lookup_ident("fn"), TokenType::Function);
+    assert_eq!(lookup_ident("fn"), Token::Function);
 }
