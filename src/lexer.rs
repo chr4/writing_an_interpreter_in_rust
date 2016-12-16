@@ -134,12 +134,12 @@ fn is_letter(ch: char) -> bool {
 
 #[test]
 fn is_letter_test() {
-    assert!(is_letter('_') == true);
-    assert!(is_letter('a') == true);
-    assert!(is_letter('Z') == true);
+    assert!(is_letter('_'));
+    assert!(is_letter('a'));
+    assert!(is_letter('Z'));
 
-    assert!(is_letter('*') == false);
-    assert!(is_letter('1') == false);
+    assert!(!is_letter('*'));
+    assert!(!is_letter('1'));
 }
 
 
