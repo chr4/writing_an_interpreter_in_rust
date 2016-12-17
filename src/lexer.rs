@@ -48,9 +48,6 @@ impl<'a> Lexer<'a> {
         let mut ident = String::new();
         ident.push(first);
 
-        // Let's skip whitespace characters, just to be sure
-        self.skip_whitespace();
-
         while self.peek_is_letter() {
             ident.push(self.read_char().unwrap()); // TODO: unwrap()
         }
@@ -61,9 +58,6 @@ impl<'a> Lexer<'a> {
     fn read_number(&mut self, first: char) -> String {
         let mut number = String::new();
         number.push(first);
-
-        // Let's skip whitespace characters, just to be sure
-        self.skip_whitespace();
 
         while let Some(&c) = self.peek_char() {
             if !c.is_numeric() {
