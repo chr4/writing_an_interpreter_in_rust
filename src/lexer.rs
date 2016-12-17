@@ -78,7 +78,7 @@ impl<'a> Lexer<'a> {
     pub fn next_token(&mut self) -> Token {
         self.skip_whitespace();
 
-        let tok = match self.read_char() {
+        match self.read_char() {
             Some('=') => {
                 if self.peek_char_eq('=') {
                     self.read_char();
@@ -121,9 +121,7 @@ impl<'a> Lexer<'a> {
 
             // Handle EOF
             None => Token::EndOfFile,
-        };
-
-        tok
+        }
     }
 }
 
